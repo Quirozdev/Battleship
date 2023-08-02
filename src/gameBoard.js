@@ -18,16 +18,24 @@ export default function GameBoard(xLength = 10, yLength = 10) {
     return newBoard;
   }
 
-  function getBoardState() {
+  function getState() {
     return board;
+  }
+
+  function getNumberOfRows() {
+    return board.length;
+  }
+
+  function getNumberOfColumns() {
+    return board[0].length;
   }
 
   function isShipPlaceValid(x, y, shipLength, shipOrientation) {
     if (shipOrientation === 'horizontal') {
-      return x + shipLength - 1 < board.length;
+      return x + shipLength - 1 < getNumberOfRows();
     }
     // vertical
-    return y + shipLength - 1 < board[0].length;
+    return y + shipLength - 1 < getNumberOfColumns();
   }
 
   function placeShip(x, y, shipLength, shipOrientation = 'horizontal') {
@@ -42,7 +50,7 @@ export default function GameBoard(xLength = 10, yLength = 10) {
     return true;
   }
 
-  function placeShipHorizontally(x, y, shipLength) {
+  function placeShipVertically(x, y, shipLength) {
     const ship = Ship(shipLength);
     for (let i = x; i < x + shipLength; i++) {
       board[i][y] = ship;
@@ -50,7 +58,7 @@ export default function GameBoard(xLength = 10, yLength = 10) {
     placedShips.push(ship);
   }
 
-  function placeShipVertically(x, y, shipLength) {
+  function placeShipHorizontally(x, y, shipLength) {
     const ship = Ship(shipLength);
     for (let i = y; i < y + shipLength; i++) {
       board[x][i] = ship;
@@ -75,6 +83,10 @@ export default function GameBoard(xLength = 10, yLength = 10) {
     return [true, 'Succesful hit'];
   }
 
+  function allTheShipsHaveBeenPlaced() {
+    return placedShips.length === 5;
+  }
+
   function allTheShipsHaveBeenSunk() {
     // if atleast one ship hasn't been sunk, then return false
     for (let i = 0; i < placedShips.length; i++) {
@@ -85,5 +97,14 @@ export default function GameBoard(xLength = 10, yLength = 10) {
     return true;
   }
 
-  return { getBoardState, placeShip, receiveAttack, allTheShipsHaveBeenSunk };
+  return {
+    getState,
+    getNumberOfRows,
+    getNumberOfColumns,
+    isShipPlaceValid,
+    placeShip,
+    receiveAttack,
+    allTheShipsHaveBeenPlaced,
+    allTheShipsHaveBeenSunk,
+  };
 }

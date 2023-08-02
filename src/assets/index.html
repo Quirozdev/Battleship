@@ -8,5 +8,65 @@
     />
     <title>Battleship</title>
   </head>
-  <body></body>
+  <body>
+    <header>
+      <h1>Battleship</h1>
+    </header>
+    <main>
+      <section>
+        <h3>Ships</h3>
+        <div class="ships">
+          <div
+            class="ship"
+            id="carrier"
+            data-ship-length="5"
+          >
+            <div class="ship-cell"></div>
+            <div class="ship-cell"></div>
+            <div class="ship-cell"></div>
+            <div class="ship-cell"></div>
+            <div class="ship-cell"></div>
+          </div>
+          <div
+            class="ship"
+            id="battleship"
+            data-ship-length="4"
+          >
+            <div class="ship-cell"></div>
+            <div class="ship-cell"></div>
+            <div class="ship-cell"></div>
+            <div class="ship-cell"></div>
+          </div>
+          <div
+            class="ship"
+            id="cruiser"
+            data-ship-length="3"
+          >
+            <div class="ship-cell"></div>
+            <div class="ship-cell"></div>
+            <div class="ship-cell"></div>
+          </div>
+          <div
+            class="ship"
+            id="submarine"
+            data-ship-length="3"
+          >
+            <div class="ship-cell"></div>
+            <div class="ship-cell"></div>
+            <div class="ship-cell"></div>
+          </div>
+          <div
+            class="ship"
+            id="destroyer"
+            data-ship-length="2"
+          >
+            <div class="ship-cell"></div>
+            <div class="ship-cell"></div>
+          </div>
+        </div>
+      </section>
+      <section id="gameboards-container"></section>
+      <button>Reset</button>
+    </main>
+  </body>
 </html>

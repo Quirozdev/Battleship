@@ -1,0 +1,73 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  min-height: 100vh;
+}
+
+#gameboards-container {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 32px;
+  padding: 32px;
+}
+
+.gameboard {
+  display: grid;
+  flex: 1;
+  min-width: 250px;
+  max-width: 400px;
+  aspect-ratio: 1 / 1;
+}
+
+.cell {
+  border: 1px solid black;
+}
+
+.cell:hover {
+  cursor: cell;
+  background-color: blue;
+}
+
+.ships {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 32px;
+}
+
+.ship {
+  display: flex;
+  cursor: move;
+}
+
+.ship-cell {
+  width: 30px;
+  height: 30px;
+  width: 50px;
+  height: 50px;
+  border: 1px solid black;
+}
+
+.dragging-element {
+  opacity: 0.5;
+}
+
+.hovered-cell {
+  background-color: green;
+}
+
+.placed-ship {
+  border: 2px dashed black;
+  opacity: 0.5;
+  cursor: no-drop;
+}
+
+.ship-cell-placed {
+  border: 2px solid yellow;
+  background-color: coral;
+}
