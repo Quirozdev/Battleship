@@ -130,12 +130,15 @@ export default function GameBoard(xLength = 10, yLength = 10) {
   function receiveAttack(x, y) {
     const objectAtCurrentCordinate = board[x][y];
     // coordinate already hit
-    if (objectAtCurrentCordinate === 'hit') {
+    if (
+      objectAtCurrentCordinate === 'hit' ||
+      objectAtCurrentCordinate === 'miss'
+    ) {
       return [false, 'Cell already hit'];
     }
     // miss
     if (objectAtCurrentCordinate === '') {
-      board[x][y] = 'hit';
+      board[x][y] = 'miss';
       return [true, 'Miss'];
     }
     // there is a ship

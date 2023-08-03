@@ -38,9 +38,9 @@ body {
   border: 1px solid black;
 }
 
-.cell:hover {
+#computer-gameboard .cell:hover {
   cursor: cell;
-  background-color: blue;
+  background-color: red;
 }
 
 #ships-container {

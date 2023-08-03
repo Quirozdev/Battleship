@@ -1,12 +1,7 @@
 import GameBoard from './gameBoard';
 
-export default function Player(playerName) {
-  const name = playerName;
+export default function Player(name) {
   const gameBoard = GameBoard();
-  // place ships
-  // ...
-  // play
-  // ...
 
   function getName() {
     return name;
@@ -17,18 +12,8 @@ export default function Player(playerName) {
   }
 
   function attack(x, y, enemyGameBoard) {
-    enemyGameBoard.receiveAttack(x, y);
+    return enemyGameBoard.receiveAttack(x, y);
   }
 
-  function hasPlacedAllShips() {
-    return new Promise((resolve, reject) => {
-      setInterval(() => {
-        if (gameBoard.allTheShipsHaveBeenPlaced()) {
-          resolve(true);
-        }
-      }, 1000);
-    });
-  }
-
-  return { getName, getGameBoard, attack, hasPlacedAllShips };
+  return { getName, getGameBoard, attack };
 }

@@ -1,16 +1,32 @@
 import './assets/gameBoard.css';
 
-export default function DOMHandler(gameBoard, gameBoardId) {
-  const gameBoardsContainer = document.getElementById('gameboards-container');
-  const domGameBoard = document.createElement('div');
-  domGameBoard.setAttribute('id', gameBoardId);
-  domGameBoard.classList.add('gameboard');
+const gameBoardsContainer = document.getElementById('gameboards-container');
+const playBtn = document.getElementById('play-btn');
 
-  const playBtn = document.getElementById('play-btn');
+export function DOMHandler(game) {
+  const player = game.getPlayer();
+  const computer = game.getComputer();
+
+  const playerGameBoard = player.getGameBoard();
+  const computerGameBoard = computer.getGameBoard();
+
+  const playerDomGameBoard = createDOMGameBoard(
+    playerGameBoard,
+    'player-gameboard'
+  );
+  const computerDomGameBoard = createDOMGameBoard(
+    computerGameBoard,
+    'computer-gameboard'
+  );
+
+  gameBoardsContainer.appendChild(playerDomGameBoard);
+  gameBoardsContainer.appendChild(computerDomGameBoard);
 
   playBtn.addEventListener('click', () => {
     removeShipsContainer();
     playBtn.remove();
+    computer.getGameBoard().placeShipsRandomly();
+    updateDisplay(computerGameBoard, computerDomGameBoard);
   });
 
   document
@@ -19,8 +35,8 @@ export default function DOMHandler(gameBoard, gameBoardId) {
 
   function randomizeShips() {
     resetShips();
-    gameBoard.placeShipsRandomly();
-    updateDisplay();
+    playerGameBoard.placeShipsRandomly();
+    updateDisplay(playerGameBoard, playerDomGameBoard);
     enablePlayButton();
   }
 
@@ -37,22 +53,13 @@ export default function DOMHandler(gameBoard, gameBoardId) {
     cell.classList.add('cell');
     cell.setAttribute('data-x-position', row);
     cell.setAttribute('data-y-position', column);
-    // atack
-    cell.addEventListener('click', () => {
-      console.log(
-        cell.getAttribute('data-x-position'),
-        cell.getAttribute('data-y-position')
-      );
-    });
-
-    addDropFunctionality(cell);
 
     return cell;
   }
 
-  function updateDisplay() {
+  function updateDisplay(gameBoard, domGameBoard) {
     const gameBoardState = gameBoard.getState();
-    const domGameBoard = document.querySelector(`.gameboard#${gameBoardId}`);
+
     const rows = gameBoard.getNumberOfRows();
     const columns = gameBoard.getNumberOfColumns();
     for (let i = 0; i < rows; i++) {
@@ -68,11 +75,30 @@ export default function DOMHandler(gameBoard, gameBoardId) {
           domGameBoard.querySelector(
             `.cell[data-x-position="${i}"][data-y-position="${j}"]`
           ).textContent = 'hit';
+        } else if (objectAtCurrentCell === 'miss') {
+          domGameBoard.querySelector(
+            `.cell[data-x-position="${i}"][data-y-position="${j}"]`
+          ).textContent = 'miss';
         } else {
           const cell = domGameBoard.querySelector(
             `.cell[data-x-position="${i}"][data-y-position="${j}"]`
           );
+          // to avoid computer gameboard ships from being visible
+          /*
+
+
+
+
+
+            COMMENTED FOR DEBUGGING
+
+
+
+
+          */
+          // if (domGameBoard === playerDomGameBoard) {
           cell.classList.add('ship-cell-placed');
+          // }
         }
       }
     }
@@ -82,21 +108,33 @@ export default function DOMHandler(gameBoard, gameBoardId) {
     document.getElementById('ships-container').remove();
   }
 
-  function displayGameboard() {
+  function createDOMGameBoard(gameBoard, id) {
+    const domGameBoard = document.createElement('div');
+    domGameBoard.classList.add('gameboard');
+    domGameBoard.setAttribute('id', id);
     const rows = gameBoard.getNumberOfRows();
     const columns = gameBoard.getNumberOfColumns();
     for (let i = 0; i < rows; i++) {
       for (let j = 0; j < columns; j++) {
-        domGameBoard.appendChild(createCell(i, j));
+        const cell = createCell(i, j);
+        if (id === 'player-gameboard') {
+          addDropFunctionality(cell);
+        } else {
+          addAtackFunctionality(cell);
+        }
+        domGameBoard.appendChild(cell);
       }
     }
-    domGameBoard.style['grid-template-rows'] = 'repeat(10, 1fr)';
-    domGameBoard.style['grid-template-columns'] = 'repeat(10, 1fr)';
+    domGameBoard.style[
+      'grid-template-rows'
+    ] = `repeat(${gameBoard.getNumberOfRows()}, 1fr)`;
+    domGameBoard.style[
+      'grid-template-columns'
+    ] = `repeat(${gameBoard.getNumberOfColumns()}, 1fr)`;
 
-    gameBoardsContainer.appendChild(domGameBoard);
+    return domGameBoard;
   }
 
-  // esta se puede repetir al crear a la computadora CAMBIAR
   document.querySelectorAll(`.ship`).forEach((element) => {
     addDragFunctionality(element);
   });
@@ -105,12 +143,12 @@ export default function DOMHandler(gameBoard, gameBoardId) {
     for (let i = 0; i < shipLength; i++) {
       let currentCell;
       if (orientation === 'horizontal') {
-        currentCell = document.querySelector(
+        currentCell = playerDomGameBoard.querySelector(
           `.cell[data-x-position="${x}"][data-y-position="${y + i}"]`
         );
       } else {
         // vertical
-        currentCell = document.querySelector(
+        currentCell = playerDomGameBoard.querySelector(
           `.cell[data-x-position="${x + i}"][data-y-position="${y}"]`
         );
       }
@@ -119,7 +157,7 @@ export default function DOMHandler(gameBoard, gameBoardId) {
   }
 
   function removeHoverCellAndNearCells() {
-    domGameBoard
+    playerDomGameBoard
       .querySelectorAll('.hovered-cell')
       .forEach((cell) => cell.classList.remove('hovered-cell'));
   }
@@ -139,12 +177,12 @@ export default function DOMHandler(gameBoard, gameBoardId) {
 
   document.getElementById('reset-ships-btn').addEventListener('click', () => {
     resetShips();
-    updateDisplay();
+    updateDisplay(playerGameBoard, playerDomGameBoard);
   });
 
   function resetShips() {
     disablePlayButton();
-    gameBoard.clearGameBoard();
+    playerGameBoard.clearGameBoard();
     document.querySelectorAll('.placed-ship').forEach((placedShip) => {
       placedShip.classList.remove('placed-ship');
       placedShip.classList.remove('dragging-element');
@@ -167,7 +205,7 @@ export default function DOMHandler(gameBoard, gameBoardId) {
       const orientation = currentDraggingElement.getAttribute(
         'data-ship-orientation'
       );
-      if (gameBoard.isShipPlaceValid(x, y, shipLength, orientation)) {
+      if (playerGameBoard.isShipPlaceValid(x, y, shipLength, orientation)) {
         console.log('valid');
         hoverCellAndItsNearCells(x, y, shipLength, orientation);
       } else {
@@ -187,17 +225,43 @@ export default function DOMHandler(gameBoard, gameBoardId) {
       const orientation = currentDraggingElement.getAttribute(
         'data-ship-orientation'
       );
-      if (gameBoard.isShipPlaceValid(x, y, shipLength, orientation)) {
-        gameBoard.placeShip(x, y, shipLength, orientation);
+      if (playerGameBoard.isShipPlaceValid(x, y, shipLength, orientation)) {
+        playerGameBoard.placeShip(x, y, shipLength, orientation);
         currentDraggingElement.classList.add('placed-ship');
-        updateDisplay();
+        updateDisplay(playerGameBoard, playerDomGameBoard);
         removeDragFunctionality(currentDraggingElement);
         removeHoverCellAndNearCells();
-        if (gameBoard.allTheShipsHaveBeenPlaced()) {
+        if (playerGameBoard.allTheShipsHaveBeenPlaced()) {
           enablePlayButton();
         }
       }
       currentDraggingElement = null;
+    });
+  }
+
+  function addAtackFunctionality(cell) {
+    cell.addEventListener('click', () => {
+      if (game.getCurrentPlayerTurn() !== player) {
+        return;
+      }
+      const x = Number(cell.getAttribute('data-x-position'));
+      const y = Number(cell.getAttribute('data-y-position'));
+      const [succesfulAttack, msg] = player.attack(x, y, computerGameBoard);
+      if (succesfulAttack) {
+        game.setCurrentPlayerTurn(computer);
+        updateDisplay(computerGameBoard, computerDomGameBoard);
+        if (computerGameBoard.allTheShipsHaveBeenSunk()) {
+          game.end(player);
+          return;
+        }
+        computer.attackRandomly(playerGameBoard);
+        updateDisplay(playerGameBoard, playerDomGameBoard);
+        if (playerGameBoard.allTheShipsHaveBeenSunk()) {
+          game.end(computer);
+          return;
+        }
+        game.setCurrentPlayerTurn(player);
+      }
     });
   }
 
@@ -209,7 +273,7 @@ export default function DOMHandler(gameBoard, gameBoardId) {
   function onDragEnd(event) {
     currentDraggingElement = null;
     event.target.classList.remove('dragging-element');
-    document
+    playerDomGameBoard
       .querySelectorAll('.hovered-cell')
       .forEach((cell) => cell.classList.remove('hovered-cell'));
   }
@@ -227,5 +291,5 @@ export default function DOMHandler(gameBoard, gameBoardId) {
     element.removeEventListener('dragend', onDragEnd);
   }
 
-  return { displayGameboard, updateDisplay };
+  return { updateDisplay };
 }
