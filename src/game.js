@@ -17,15 +17,10 @@ export default function Game(player, computer) {
     currentTurn = player;
   }
 
-  function end(player) {
-    alert(`${player.getName()} wins!!!!`);
-  }
-
   return {
     getPlayer,
     getComputer,
     getCurrentPlayerTurn,
     setCurrentPlayerTurn,
-    end,
   };
 }

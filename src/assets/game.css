@@ -1,0 +1,158 @@
+#game {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  height: 75vh;
+}
+
+#gameboards-container {
+  flex: 1;
+  display: flex;
+  justify-content: space-evenly;
+  flex-wrap: wrap;
+  gap: 32px;
+  padding: 24px;
+}
+
+.gameboard {
+  display: grid;
+  flex: 1;
+  min-width: 250px;
+  max-width: 400px;
+  aspect-ratio: 1 / 1;
+  background-color: #a5f3fc;
+}
+
+.cell {
+  border: 1px solid black;
+  background-color: #a5f3fc;
+  font-size: 1.3rem;
+}
+
+#computer-gameboard .cell:hover {
+  cursor: cell;
+  background-color: #e11d48;
+}
+
+#ships-container {
+  width: 30%;
+  min-width: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+#ships-title {
+  color: #eff6ff;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+#ship-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+}
+
+#ship-buttons button {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: bold;
+  border: 1px solid black;
+  color: #020617;
+}
+
+#ship-buttons button:hover {
+  background-color: white;
+}
+
+#rotate-ships-btn {
+  background-color: #8b5cf6;
+}
+
+#randomize-ships-btn {
+  background-color: #10b981;
+}
+
+#reset-ships-btn {
+  background-color: #fde047;
+}
+
+.ships {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 32px;
+}
+
+.ship {
+  display: flex;
+  cursor: move;
+}
+
+.ship[data-ship-orientation='horizontal'] {
+  flex-direction: row;
+}
+
+.ship[data-ship-orientation='vertical'] {
+  flex-direction: column;
+}
+
+.ship-cell {
+  width: 30px;
+  height: 30px;
+  border: 1px solid #042f2e;
+  background-color: #14b8a6;
+}
+
+.dragging-element {
+  opacity: 0.5;
+}
+
+.hovered-cell {
+  background-color: green;
+}
+
+.placed-ship {
+  border: 2px dashed #f7fee7;
+  opacity: 0.5;
+  cursor: no-drop;
+}
+
+.ship-cell-placed {
+  border: 1px solid #042f2e;
+  background-color: #14b8a6;
+}
+
+.ship-cell-placed.invisible {
+  border: 1px solid black;
+  background-color: inherit;
+}
+
+#computer-gameboard .cell.already-hit-cell {
+  cursor: not-allowed;
+}
+
+#computer-gameboard .cell.already-hit-cell:hover {
+  background-color: inherit;
+}
+
+#replay-btn {
+  align-self: center;
+  padding: 8px 24px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border-radius: 6px;
+  border: 2px solid black;
+  background-color: #fbbf24;
+}
+
+#replay-btn:hover {
+  background-color: #eff6ff;
+}

@@ -1,9 +1,10 @@
-import './assets/gameBoard.css';
-
-const gameBoardsContainer = document.getElementById('gameboards-container');
-const playBtn = document.getElementById('play-btn');
+import './assets/game.css';
 
 export function DOMHandler(game) {
+  const gameBoardsContainer = document.getElementById('gameboards-container');
+  const gameMessage = document.getElementById('message');
+  const playBtn = document.getElementById('play-btn');
+
   const player = game.getPlayer();
   const computer = game.getComputer();
 
@@ -18,6 +19,7 @@ export function DOMHandler(game) {
     computerGameBoard,
     'computer-gameboard'
   );
+  hideComputerGameBoard();
 
   gameBoardsContainer.appendChild(playerDomGameBoard);
   gameBoardsContainer.appendChild(computerDomGameBoard);
@@ -26,8 +28,26 @@ export function DOMHandler(game) {
     removeShipsContainer();
     playBtn.remove();
     computer.getGameBoard().placeShipsRandomly();
+    showComputerGameBoard();
     updateDisplay(computerGameBoard, computerDomGameBoard);
+    setCurrentTurnMessage();
   });
+
+  function hideComputerGameBoard() {
+    computerDomGameBoard.style.display = 'none';
+  }
+
+  function showComputerGameBoard() {
+    computerDomGameBoard.style.display = 'grid';
+  }
+
+  function showComputerShips() {
+    computerDomGameBoard
+      .querySelectorAll('.ship-cell-placed')
+      .forEach((ship) => {
+        ship.classList.remove('invisible');
+      });
+  }
 
   document
     .getElementById('randomize-ships-btn')
@@ -35,17 +55,40 @@ export function DOMHandler(game) {
 
   function randomizeShips() {
     resetShips();
+    document.querySelectorAll('.ship').forEach((ship) => {
+      removeDragFunctionality(ship);
+      ship.classList.add('placed-ship');
+    });
     playerGameBoard.placeShipsRandomly();
     updateDisplay(playerGameBoard, playerDomGameBoard);
     enablePlayButton();
   }
 
   function enablePlayButton() {
-    playBtn.removeAttribute('disabled');
+    playBtn.style.visibility = 'visible';
   }
 
   function disablePlayButton() {
-    playBtn.setAttribute('disabled', '');
+    playBtn.style.visibility = 'hidden';
+  }
+
+  function setCurrentTurnMessage() {
+    gameMessage.textContent = `It's ${game
+      .getCurrentPlayerTurn()
+      .getName()} turn`;
+  }
+
+  function setWinner(winner) {
+    gameMessage.textContent = `${winner.getName()} won!!`;
+    const replayBtn = document.createElement('button');
+    replayBtn.textContent = 'Replay';
+    replayBtn.setAttribute('id', 'replay-btn');
+    replayBtn.addEventListener('click', () => {
+      location.reload();
+    });
+    document
+      .getElementById('message-and-play-container')
+      .appendChild(replayBtn);
   }
 
   function createCell(row, column) {
@@ -65,40 +108,23 @@ export function DOMHandler(game) {
     for (let i = 0; i < rows; i++) {
       for (let j = 0; j < columns; j++) {
         const objectAtCurrentCell = gameBoardState[i][j];
+        const domGameBoardCell = domGameBoard.querySelector(
+          `.cell[data-x-position="${i}"][data-y-position="${j}"]`
+        );
         if (objectAtCurrentCell === '') {
-          domGameBoard
-            .querySelector(
-              `.cell[data-x-position="${i}"][data-y-position="${j}"]`
-            )
-            .classList.remove('ship-cell-placed');
+          domGameBoardCell.classList.remove('ship-cell-placed');
         } else if (objectAtCurrentCell === 'hit') {
-          domGameBoard.querySelector(
-            `.cell[data-x-position="${i}"][data-y-position="${j}"]`
-          ).textContent = 'hit';
+          domGameBoardCell.textContent = '🎯';
         } else if (objectAtCurrentCell === 'miss') {
-          domGameBoard.querySelector(
-            `.cell[data-x-position="${i}"][data-y-position="${j}"]`
-          ).textContent = 'miss';
+          domGameBoardCell.textContent = '🌊';
         } else {
-          const cell = domGameBoard.querySelector(
-            `.cell[data-x-position="${i}"][data-y-position="${j}"]`
-          );
           // to avoid computer gameboard ships from being visible
-          /*
-
-
-
-
-
-            COMMENTED FOR DEBUGGING
-
-
-
-
-          */
-          // if (domGameBoard === playerDomGameBoard) {
-          cell.classList.add('ship-cell-placed');
-          // }
+          if (domGameBoard === playerDomGameBoard) {
+            domGameBoardCell.classList.add('ship-cell-placed');
+          } else {
+            domGameBoardCell.classList.add('ship-cell-placed');
+            domGameBoardCell.classList.add('invisible');
+          }
         }
       }
     }
@@ -239,8 +265,10 @@ export function DOMHandler(game) {
     });
   }
 
+  // this is a simulation of the game loop
   function addAtackFunctionality(cell) {
-    cell.addEventListener('click', () => {
+    cell.addEventListener('click', async () => {
+      // to avoid the player from attacking multiple times before the computer
       if (game.getCurrentPlayerTurn() !== player) {
         return;
       }
@@ -248,19 +276,29 @@ export function DOMHandler(game) {
       const y = Number(cell.getAttribute('data-y-position'));
       const [succesfulAttack, msg] = player.attack(x, y, computerGameBoard);
       if (succesfulAttack) {
+        cell.classList.add('already-hit-cell');
         game.setCurrentPlayerTurn(computer);
+        setCurrentTurnMessage();
         updateDisplay(computerGameBoard, computerDomGameBoard);
         if (computerGameBoard.allTheShipsHaveBeenSunk()) {
-          game.end(player);
+          showComputerShips();
+          setWinner(player);
           return;
         }
-        computer.attackRandomly(playerGameBoard);
+        setCurrentTurnMessage();
+        await new Promise((resolve) => {
+          setTimeout(() => {
+            resolve(computer.attackRandomly(playerGameBoard));
+          }, 1500);
+        });
         updateDisplay(playerGameBoard, playerDomGameBoard);
         if (playerGameBoard.allTheShipsHaveBeenSunk()) {
-          game.end(computer);
+          showComputerShips();
+          setWinner(computer);
           return;
         }
         game.setCurrentPlayerTurn(player);
+        setCurrentTurnMessage();
       }
     });
   }

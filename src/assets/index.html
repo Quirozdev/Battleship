@@ -10,21 +10,26 @@
   </head>
   <body>
     <header>
-      <h1>Battleship</h1>
+      <h1 id="game-title">Battleship</h1>
     </header>
     <main>
-      <button
-        id="play-btn"
-        disabled
-      >
-        Play
-      </button>
+      <section id="message-and-play-container">
+        <p id="message">Place your ships</p>
+        <button
+          id="play-btn"
+          style="visibility: hidden"
+        >
+          Play
+        </button>
+      </section>
       <section id="game">
         <section id="ships-container">
-          <h3>Ships</h3>
-          <button id="rotate-ships-btn">Rotate</button>
-          <button id="randomize-ships-btn">Randomize</button>
-          <button id="reset-ships-btn">Reset</button>
+          <h3 id="ships-title">Ships</h3>
+          <div id="ship-buttons">
+            <button id="rotate-ships-btn">Rotate</button>
+            <button id="randomize-ships-btn">Randomize</button>
+            <button id="reset-ships-btn">Reset</button>
+          </div>
           <div class="ships">
             <div
               class="ship"
