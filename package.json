@@ -7,7 +7,8 @@
     "build": "webpack",
     "serve": "webpack serve",
     "test": "jest",
-    "test-watch": "jest --watch"
+    "test-watch": "jest --watch",
+    "uploadToGitHubPages": "git subtree push --prefix dist origin gh-pages"
   },
   "keywords": [],
   "author": "",
