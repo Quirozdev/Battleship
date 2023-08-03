@@ -4,7 +4,7 @@ export default function GameBoard(xLength = 10, yLength = 10) {
   const board = createBoard(xLength, yLength);
   // this is an array that will keep all the placed Ship objects, and its going to be useful
   // for the allTheShipsHaveBeenSunk method (to avoid double looping the board and searching where are the ships)
-  const placedShips = [];
+  let placedShips = [];
 
   function createBoard(xLength, yLength) {
     const newBoard = [];
@@ -30,24 +30,62 @@ export default function GameBoard(xLength = 10, yLength = 10) {
     return board[0].length;
   }
 
-  function isShipPlaceValid(x, y, shipLength, shipOrientation) {
-    if (shipOrientation === 'horizontal') {
-      return x + shipLength - 1 < getNumberOfRows();
+  function ensureShipPlaceIsNotOutOfBounds(endingPosition, limit) {
+    return endingPosition < limit;
+  }
+
+  function isThereAShipHorizontally(x, y, shipLength) {
+    for (let i = y; i < y + shipLength; i++) {
+      if (typeof board[x][i] === 'object') {
+        return true;
+      }
     }
-    // vertical
-    return y + shipLength - 1 < getNumberOfColumns();
+    return false;
+  }
+
+  function isThereAShipVertically(x, y, shipLength) {
+    for (let i = x; i < x + shipLength; i++) {
+      if (typeof board[i][y] === 'object') {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function isShipPlaceValid(x, y, shipLength, shipOrientation = 'horizontal') {
+    const isShipPlacementOutOfBounds =
+      shipOrientation === 'horizontal'
+        ? ensureShipPlaceIsNotOutOfBounds(
+            y + shipLength - 1,
+            getNumberOfColumns()
+          )
+        : ensureShipPlaceIsNotOutOfBounds(
+            x + shipLength - 1,
+            getNumberOfRows()
+          );
+
+    if (!isShipPlacementOutOfBounds) {
+      return false;
+    }
+
+    const isThereAShipAlready =
+      shipOrientation === 'horizontal'
+        ? isThereAShipHorizontally(x, y, shipLength)
+        : isThereAShipVertically(x, y, shipLength);
+
+    if (isThereAShipAlready) {
+      return false;
+    }
+
+    return true;
   }
 
   function placeShip(x, y, shipLength, shipOrientation = 'horizontal') {
-    if (!isShipPlaceValid(x, y, shipLength, shipOrientation)) {
-      return false;
-    }
     if (shipOrientation === 'horizontal') {
       placeShipHorizontally(x, y, shipLength);
     } else {
       placeShipVertically(x, y, shipLength);
     }
-    return true;
   }
 
   function placeShipVertically(x, y, shipLength) {
@@ -64,6 +102,29 @@ export default function GameBoard(xLength = 10, yLength = 10) {
       board[x][i] = ship;
     }
     placedShips.push(ship);
+  }
+
+  function placeShipRandomly(shipLength) {
+    const orientations = ['horizontal', 'vertical'];
+    while (true) {
+      const x = Math.floor(Math.random() * getNumberOfRows());
+      const y = Math.floor(Math.random() * getNumberOfColumns());
+      const orientation =
+        orientations[Math.floor(Math.random() * orientations.length)];
+      if (isShipPlaceValid(x, y, shipLength, orientation)) {
+        placeShip(x, y, shipLength, orientation);
+        break;
+      }
+    }
+  }
+
+  function placeShipsRandomly() {
+    const shipLengths = [5, 4, 3, 3, 2];
+    while (!allTheShipsHaveBeenPlaced()) {
+      shipLengths.forEach((shipLength) => {
+        placeShipRandomly(shipLength);
+      });
+    }
   }
 
   function receiveAttack(x, y) {
@@ -97,6 +158,15 @@ export default function GameBoard(xLength = 10, yLength = 10) {
     return true;
   }
 
+  function clearGameBoard() {
+    for (let i = 0; i < xLength; i++) {
+      for (let j = 0; j < yLength; j++) {
+        board[i][j] = '';
+      }
+    }
+    placedShips = [];
+  }
+
   return {
     getState,
     getNumberOfRows,
@@ -104,7 +174,9 @@ export default function GameBoard(xLength = 10, yLength = 10) {
     isShipPlaceValid,
     placeShip,
     receiveAttack,
+    placeShipsRandomly,
     allTheShipsHaveBeenPlaced,
     allTheShipsHaveBeenSunk,
+    clearGameBoard,
   };
 }

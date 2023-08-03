@@ -20,5 +20,15 @@ export default function Player(playerName) {
     enemyGameBoard.receiveAttack(x, y);
   }
 
-  return { getName, getGameBoard, attack };
+  function hasPlacedAllShips() {
+    return new Promise((resolve, reject) => {
+      setInterval(() => {
+        if (gameBoard.allTheShipsHaveBeenPlaced()) {
+          resolve(true);
+        }
+      }, 1000);
+    });
+  }
+
+  return { getName, getGameBoard, attack, hasPlacedAllShips };
 }

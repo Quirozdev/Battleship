@@ -5,7 +5,19 @@ const player = new Player('luis');
 
 const computer = new Player('computer');
 
+// const domHandler = DOMHandler(player.getGameBoard(), computer.getGameBoard());
+
 const playerDomHandler = DOMHandler(player.getGameBoard(), 'player');
+
+// const computerDomHandler = DOMHandler(computer.getGameBoard(), 'computer');
+
+playerDomHandler.displayGameboard();
+
+// await player.hasPlacedAllShips();
+
+// computerDomHandler.displayGameboard();
+
+console.log('xd');
 
 // TODOS
 /*
@@ -17,17 +29,7 @@ const playerDomHandler = DOMHandler(player.getGameBoard(), 'player');
 
 // const computerDomHandler = DOMHandler(computer.getGameBoard(), 'computer');
 
-playerDomHandler.displayGameboard();
-
 // computerDomHandler.displayGameboard();
-
-// const ships = {
-//   Carrier: 5,
-//   Battleship: 4,
-//   Destroyer: 3,
-//   Submarine: 3,
-//   'Patrol Boat': 2,
-// };
 
 // playerGameboard.placeShip(0, 0, 5, 'horizontal');
 // playerGameboard.placeShip(9, 3, 4, 'horizontal');

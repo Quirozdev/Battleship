@@ -2,6 +2,35 @@ import './assets/gameBoard.css';
 
 export default function DOMHandler(gameBoard, gameBoardId) {
   const gameBoardsContainer = document.getElementById('gameboards-container');
+  const domGameBoard = document.createElement('div');
+  domGameBoard.setAttribute('id', gameBoardId);
+  domGameBoard.classList.add('gameboard');
+
+  const playBtn = document.getElementById('play-btn');
+
+  playBtn.addEventListener('click', () => {
+    removeShipsContainer();
+    playBtn.remove();
+  });
+
+  document
+    .getElementById('randomize-ships-btn')
+    .addEventListener('click', randomizeShips);
+
+  function randomizeShips() {
+    resetShips();
+    gameBoard.placeShipsRandomly();
+    updateDisplay();
+    enablePlayButton();
+  }
+
+  function enablePlayButton() {
+    playBtn.removeAttribute('disabled');
+  }
+
+  function disablePlayButton() {
+    playBtn.setAttribute('disabled', '');
+  }
 
   function createCell(row, column) {
     const cell = document.createElement('button');
@@ -29,13 +58,17 @@ export default function DOMHandler(gameBoard, gameBoardId) {
     for (let i = 0; i < rows; i++) {
       for (let j = 0; j < columns; j++) {
         const objectAtCurrentCell = gameBoardState[i][j];
-        if (objectAtCurrentCell === 'hit') {
+        if (objectAtCurrentCell === '') {
+          domGameBoard
+            .querySelector(
+              `.cell[data-x-position="${i}"][data-y-position="${j}"]`
+            )
+            .classList.remove('ship-cell-placed');
+        } else if (objectAtCurrentCell === 'hit') {
           domGameBoard.querySelector(
             `.cell[data-x-position="${i}"][data-y-position="${j}"]`
           ).textContent = 'hit';
-        }
-        // ship
-        if (typeof objectAtCurrentCell === 'object') {
+        } else {
           const cell = domGameBoard.querySelector(
             `.cell[data-x-position="${i}"][data-y-position="${j}"]`
           );
@@ -45,10 +78,11 @@ export default function DOMHandler(gameBoard, gameBoardId) {
     }
   }
 
+  function removeShipsContainer() {
+    document.getElementById('ships-container').remove();
+  }
+
   function displayGameboard() {
-    const domGameBoard = document.createElement('div');
-    domGameBoard.setAttribute('id', gameBoardId);
-    domGameBoard.classList.add('gameboard');
     const rows = gameBoard.getNumberOfRows();
     const columns = gameBoard.getNumberOfColumns();
     for (let i = 0; i < rows; i++) {
@@ -67,13 +101,55 @@ export default function DOMHandler(gameBoard, gameBoardId) {
     addDragFunctionality(element);
   });
 
-  function hoverCellAndItsNearCells(x, y, shipLength) {
+  function hoverCellAndItsNearCells(x, y, shipLength, orientation) {
     for (let i = 0; i < shipLength; i++) {
-      const currentCell = document.querySelector(
-        `.cell[data-x-position="${x}"][data-y-position="${y + i}"]`
-      );
+      let currentCell;
+      if (orientation === 'horizontal') {
+        currentCell = document.querySelector(
+          `.cell[data-x-position="${x}"][data-y-position="${y + i}"]`
+        );
+      } else {
+        // vertical
+        currentCell = document.querySelector(
+          `.cell[data-x-position="${x + i}"][data-y-position="${y}"]`
+        );
+      }
       currentCell.classList.add('hovered-cell');
     }
+  }
+
+  function removeHoverCellAndNearCells() {
+    domGameBoard
+      .querySelectorAll('.hovered-cell')
+      .forEach((cell) => cell.classList.remove('hovered-cell'));
+  }
+
+  document
+    .getElementById('rotate-ships-btn')
+    .addEventListener('click', rotateShips);
+
+  function rotateShips() {
+    document.querySelectorAll('.ship').forEach((ship) => {
+      const currentOrientation = ship.getAttribute('data-ship-orientation');
+      const rotatedOrientation =
+        currentOrientation === 'horizontal' ? 'vertical' : 'horizontal';
+      ship.setAttribute('data-ship-orientation', rotatedOrientation);
+    });
+  }
+
+  document.getElementById('reset-ships-btn').addEventListener('click', () => {
+    resetShips();
+    updateDisplay();
+  });
+
+  function resetShips() {
+    disablePlayButton();
+    gameBoard.clearGameBoard();
+    document.querySelectorAll('.placed-ship').forEach((placedShip) => {
+      placedShip.classList.remove('placed-ship');
+      placedShip.classList.remove('dragging-element');
+      addDragFunctionality(placedShip);
+    });
   }
 
   let currentDraggingElement;
@@ -82,17 +158,18 @@ export default function DOMHandler(gameBoard, gameBoardId) {
     element.addEventListener('dragover', (e) => {
       e.preventDefault();
       if (!currentDraggingElement) return;
-      document
-        .querySelectorAll('.hovered-cell')
-        .forEach((cell) => cell.classList.remove('hovered-cell'));
+      removeHoverCellAndNearCells();
       const x = Number(element.getAttribute('data-x-position'));
       const y = Number(element.getAttribute('data-y-position'));
       const shipLength = Number(
         currentDraggingElement.getAttribute('data-ship-length')
       );
-      if (gameBoard.isShipPlaceValid(x, y, shipLength)) {
+      const orientation = currentDraggingElement.getAttribute(
+        'data-ship-orientation'
+      );
+      if (gameBoard.isShipPlaceValid(x, y, shipLength, orientation)) {
         console.log('valid');
-        hoverCellAndItsNearCells(x, y, shipLength);
+        hoverCellAndItsNearCells(x, y, shipLength, orientation);
       } else {
         console.log('invalid');
       }
@@ -102,19 +179,24 @@ export default function DOMHandler(gameBoard, gameBoardId) {
       e.preventDefault();
       if (!currentDraggingElement) return;
       const cellToPlaceShip = e.target;
-      // const draggedShipId = e.dataTransfer.getData('draggedElementId');
-      // const draggedShip = document.getElementById(draggedShipId);
       const x = Number(cellToPlaceShip.getAttribute('data-x-position'));
       const y = Number(cellToPlaceShip.getAttribute('data-y-position'));
       const shipLength = Number(
         currentDraggingElement.getAttribute('data-ship-length')
       );
-      if (gameBoard.isShipPlaceValid(x, y, shipLength)) {
-        gameBoard.placeShip(x, y, shipLength);
+      const orientation = currentDraggingElement.getAttribute(
+        'data-ship-orientation'
+      );
+      if (gameBoard.isShipPlaceValid(x, y, shipLength, orientation)) {
+        gameBoard.placeShip(x, y, shipLength, orientation);
         currentDraggingElement.classList.add('placed-ship');
         updateDisplay();
+        removeDragFunctionality(currentDraggingElement);
+        removeHoverCellAndNearCells();
+        if (gameBoard.allTheShipsHaveBeenPlaced()) {
+          enablePlayButton();
+        }
       }
-      removeDragFunctionality(currentDraggingElement);
       currentDraggingElement = null;
     });
   }
